@@ -1,33 +1,32 @@
-import { hashSync } from "bcrypt";
+
 import {userModel} from "../models/userModel.js";
 import orderModel from "../models/orderModel.js";
 
 import JWT from 'jsonwebtoken'
 import { hashPassword, comparePassword } from '../helpers/authHelper.js';
- export const registerController = async (req, res) => {
+export const registerController = async (req, res) => {
   try {
-    const { name, email, password, phone, address,answer } = req.body;
+    const { name, email, password, phone, address, answer } = req.body;
 
     // validations
-   if(!name){
-    return res.send({message:"Name is Required"})
-   } 
-   if(!email){
-    return res.send({message:"Email is Required"})
-   }
-   if(!password){
-    return res.send({message:"Password is Required"})
-   }
-   if(!phone){
-    return res.send({message:"Phone is Required"})
-   }
-   if(!address){
-    return res.send({message:"Address is Required"})
-   }
-   if(!answer){
-    return res.send({message:"Answer is Required"})
-   }
-  
+    if (!name) {
+      return res.send({ message: "Name is Required" });
+    }
+    if (!email) {
+      return res.send({ message: "Email is Required" });
+    }
+    if (!password) {
+      return res.send({ message: "Password is Required" });
+    }
+    if (!phone) {
+      return res.send({ message: "Phone is Required" });
+    }
+    if (!address) {
+      return res.send({ message: "Address is Required" });
+    }
+    if (!answer) {
+      return res.send({ message: "Answer is Required" });
+    }
 
     // check user
     const existingUser = await userModel.findOne({ email });
@@ -41,17 +40,20 @@ import { hashPassword, comparePassword } from '../helpers/authHelper.js';
     }
 
     // Hash the password
-    const hashPassword = hashSync(password, 10);
+    const hashedPassword = await hashPassword(password, 10);
 
-    // save
-    const user = await new userModel({
+    // Create a new user instance
+    const user = new userModel({
       name,
       email,
       phone,
       address,
-      password: hashPassword,
+      password: hashedPassword,
       answer,
-    }).save();
+    });
+
+    // Save the user
+    await user.save();
 
     res.status(201).send({
       success: true,
